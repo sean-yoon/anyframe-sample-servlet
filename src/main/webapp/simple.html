@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>WebSockets Test</title>
+</head>
+<body>
+	<!-- <script type="text/javascript"
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"> -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js">
+		
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			/* Bind the buttons to their handlers */
+			$('#connect').click(connect);
+			$('#disconnect').click(disconnect);
+			$('#send').click(send);
+			toggleButtons(false);
+		});
+
+		/* Open a new WebSocket connection and connect the user */
+		function connect() {
+			/* If we are already connected, disconnect first */
+			if (window.ws)
+				ws.close();
+			/* Connect to the server; absolute URL required here! */
+			ws = new WebSocket("ws://" + window.location.host + "/hellows/simple");
+			/* Register the WebSocket event handlers */
+			ws.onopen = function() {
+				toggleButtons(true);
+				appendMsg('<b>CONNECTED</b>');
+			};
+			ws.onmessage = function(msg) {
+				appendMsg(msg.data);
+			};
+			ws.onerror = function(err) {
+				appendMsg('<b>ERROR: ' + err + '</b>');
+			};
+			ws.onclose = function() {
+				toggleButtons(false);
+				appendMsg('<b>DISCONNECT</b>');
+			};
+		}
+
+		/* Close the current WebSocket connection */
+		function disconnect() {
+			if (window.ws)
+				ws.close();
+		}
+
+		/* Append the given message to the text window */
+		function appendMsg(msg) {
+			var message = $('#message');
+			message.append('<div>' + msg + '</div>');
+			message.scrollTop(message.prop('scrollHeight'));
+		}
+
+		/* Send currently entered text to the server */
+		function send() {
+			var msg = $('#input').val();
+			if (ws && msg) {
+				$('#input').val('');
+				ws.send(msg);
+			}
+		}
+
+		/* Enable/disable buttons depending on connect state */
+		function toggleButtons(connected) {
+			if (connected) {
+				$('#connect').attr('disabled', 'disabled');
+				$('#disconnect').removeAttr('disabled');
+				$('#send').removeAttr('disabled');
+			} else {
+				$('#connect').removeAttr('disabled');
+				$('#disconnect').attr('disabled', 'disabled');
+				$('#send').attr('disabled', 'disabled');
+			}
+		}
+	</script>
+	<button id="connect">connect</button>
+	<button id="disconnect">disconnect</button>
+	<input id="input" type="text" style="width: 400px"></input>
+	<button style="width: 60px;" id="send">Send</button>
+	<div id="message"
+		style="width: 640px; height: 480px; overflow-y: auto; border: 1px solid;"></div>
+</body>
+</html>
